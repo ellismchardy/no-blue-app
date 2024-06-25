@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Scale, Label, Entry, Button, HORIZONTAL, messagebox
+from tkinter import ttk, messagebox
 import subprocess
 import re
 
@@ -19,10 +19,12 @@ def set_gamma(output_name, red_gamma, green_gamma, blue_gamma):
     subprocess.call(command, shell=True)
 
 # Main class for the GUI application
-class BlueLightFilterApp:
+class NoBlueApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Blue Light Filter")
+        self.root.title("NoBlueApp - Blue Light Filter")
+        self.root.geometry("500x500")  # Set initial window size
+        self.root.configure(bg='#f0f0f0')  # Set background color to light gray gradient
 
         # Determine the output name and store it in the instance
         try:
@@ -30,7 +32,7 @@ class BlueLightFilterApp:
         except Exception as e:
             self.output_name = None
             print(f"Error: {e}")
-            tk.Label(root, text="No connected display found.").pack()
+            ttk.Label(root, text="No connected display found.", foreground='black', background='#f0f0f0').pack(pady=20)
             return
 
         # Default gamma values
@@ -38,54 +40,80 @@ class BlueLightFilterApp:
         self.default_green_gamma = 0.88
         self.default_blue_gamma = 0.76
 
+        # Title label with a bold modern font
+        self.title_label = ttk.Label(root, text="NoBlueApp", font=("Helvetica", 24, "bold"), foreground='black', background='#f0f0f0')
+        self.title_label.pack(pady=(20, 30))  # Adjust vertical padding
+
         # Create a label to provide instructions to the user
-        self.label = Label(root, text="Adjust the gamma values")
+        self.label = ttk.Label(root, text="Adjust the gamma values", foreground='black', background='#f0f0f0')
         self.label.pack()
 
-        # Create entry boxes and scales for gamma adjustment
-        self.red_entry = Entry(root)
-        self.red_entry.insert(0, f"{self.default_red_gamma:.2f}")
-        self.red_entry.pack()
+        # Red Gamma Title
+        self.red_title = ttk.Label(root, text="Red Gamma", font=("Helvetica", 12, "bold"), foreground='black', background='#f0f0f0')
+        self.red_title.pack(pady=(20, 0))  # Adjust vertical padding
 
-        self.red_scale = Scale(root, from_=0.1, to=1.0, orient=HORIZONTAL, resolution=0.01, label="Red Gamma", command=self.update_gamma)
+        # Create entry box and scale for Red Gamma adjustment
+        self.red_entry = ttk.Entry(root, font=('Helvetica', 12))
+        self.red_entry.insert(0, f"{self.default_red_gamma:.2f}")
+        self.red_entry.pack(pady=(0, 10))  # Adjust vertical spacing
+
+        self.red_scale = ttk.Scale(root, from_=0.1, to=1.0, orient=tk.HORIZONTAL, length=200, style='custom.Horizontal.TScale',
+                                   command=self.update_gamma)
         self.red_scale.set(self.default_red_gamma)
         self.red_scale.pack()
 
-        self.green_entry = Entry(root)
-        self.green_entry.insert(0, f"{self.default_green_gamma:.2f}")
-        self.green_entry.pack()
 
-        self.green_scale = Scale(root, from_=0.1, to=1.0, orient=HORIZONTAL, resolution=0.01, label="Green Gamma", command=self.update_gamma)
+        # Green Gamma Title
+        self.green_title = ttk.Label(root, text="Green Gamma", font=("Helvetica", 12, "bold"), foreground='black', background='#f0f0f0')
+        self.green_title.pack(pady=(20, 0))  # Adjust vertical padding
+
+        # Create entry box and scale for Green Gamma adjustment
+        self.green_entry = ttk.Entry(root, font=('Helvetica', 12))
+        self.green_entry.insert(0, f"{self.default_green_gamma:.2f}")
+        self.green_entry.pack(pady=(0, 10))  # Adjust vertical spacing
+
+        self.green_scale = ttk.Scale(root, from_=0.1, to=1.0, orient=tk.HORIZONTAL, length=200, style='custom.Horizontal.TScale',
+                                        command=self.update_gamma)
         self.green_scale.set(self.default_green_gamma)
         self.green_scale.pack()
 
-        self.blue_entry = Entry(root)
-        self.blue_entry.insert(0, f"{self.default_blue_gamma:.2f}")
-        self.blue_entry.pack()
+        # Blue Gamma Title
+        self.blue_title = ttk.Label(root, text="Blue Gamma", font=("Helvetica", 12, "bold"), foreground='black', background='#f0f0f0')
+        self.blue_title.pack(pady=(20, 0))  # Adjust vertical padding
 
-        self.blue_scale = Scale(root, from_=0.1, to=1.0, orient=HORIZONTAL, resolution=0.01, label="Blue Gamma", command=self.update_gamma)
+        # Create entry box and scale for Blue Gamma adjustment
+        self.blue_entry = ttk.Entry(root, font=('Helvetica', 12))
+        self.blue_entry.insert(0, f"{self.default_blue_gamma:.2f}")
+        self.blue_entry.pack(pady=(0, 10))  # Adjust vertical spacing
+
+        self.blue_scale = ttk.Scale(root, from_=0.1, to=1.0, orient=tk.HORIZONTAL, length=200, style='custom.Horizontal.TScale',
+                                    command=self.update_gamma)
         self.blue_scale.set(self.default_blue_gamma)
         self.blue_scale.pack()
 
-        # Add a button to apply gamma settings
-        self.apply_button = Button(root, text="Apply Gamma Settings", command=self.apply_gamma_settings)
-        self.apply_button.pack()
-
         # Add a button to revert gamma settings
-        self.revert_button = Button(root, text="Revert to Defaults", command=self.revert_gamma_settings)
-        self.revert_button.pack()
+        self.revert_button = ttk.Button(root, text="Revert to Defaults", command=self.revert_gamma_settings)
+        self.revert_button.pack(pady=(20, 30))  # Adjust vertical padding
 
         # Bind Return key to entry boxes for instant update
         self.red_entry.bind('<Return>', lambda event: self.update_from_entry(event, 'red'))
-        self.green_entry.bind('<Return>', lambda event: self.update_from_entry(event, 'green'))
-        self.blue_entry.bind('<Return>', lambda event: self.update_from_entry(event, 'blue'))
+        if self.output_name:
+            self.green_entry.bind('<Return>', lambda event: self.update_from_entry(event, 'green'))
+            self.blue_entry.bind('<Return>', lambda event: self.update_from_entry(event, 'blue'))
+
+        # Style configuration for circular sliders
+        self.root.style = ttk.Style()
+        self.root.style.theme_use('clam')  # Use a consistent theme for ttk widgets
+        self.root.style.configure('custom.Horizontal.TScale', sliderthickness=20, troughcolor='#cccccc', background='#cccccc',
+                                  foreground='#000000', gripcount=0)  # Adjust slider appearance
+
 
     # Method to update gamma values when scales are adjusted
     def update_gamma(self, value):
         red_gamma = float(self.red_scale.get())
         green_gamma = float(self.green_scale.get())
         blue_gamma = float(self.blue_scale.get())
-        
+
         # Update entry boxes with current scale values
         self.red_entry.delete(0, tk.END)
         self.red_entry.insert(0, f"{red_gamma:.2f}")
@@ -112,30 +140,19 @@ class BlueLightFilterApp:
             elif color == 'blue':
                 blue_gamma = float(self.blue_entry.get())
                 self.blue_scale.set(blue_gamma)
-            
+
             # Apply gamma settings immediately from entry box input
             if self.output_name:
-                set_gamma(self.output_name, float(self.red_scale.get()), float(self.green_scale.get()), float(self.blue_scale.get()))
+                set_gamma(self.output_name, float(self.red_scale.get()), float(self.green_scale.get()),
+                          float(self.blue_scale.get()))
         except ValueError:
             messagebox.showerror("Error", "Please enter a valid number.")
-
-    # Method to apply gamma settings using entry box values
-    def apply_gamma_settings(self):
-        try:
-            red_gamma = float(self.red_entry.get())
-            green_gamma = float(self.green_entry.get())
-            blue_gamma = float(self.blue_entry.get())
-            
-            if self.output_name:
-                set_gamma(self.output_name, red_gamma, green_gamma, blue_gamma)
-        except ValueError:
-            messagebox.showerror("Error", "Please enter valid gamma values.")
 
     # Method to revert gamma settings to default values
     def revert_gamma_settings(self):
         if self.output_name:
             set_gamma(self.output_name, 1.0, 1.0, 1.0)
-            
+
             # Update scales and entry boxes to reflect default values
             self.red_entry.delete(0, tk.END)
             self.red_entry.insert(0, f"{1.0:.2f}")
@@ -152,5 +169,5 @@ class BlueLightFilterApp:
 # Main function to run the application
 if __name__ == "__main__":
     root = tk.Tk()
-    app = BlueLightFilterApp(root)
+    app = NoBlueApp(root)
     root.mainloop()
